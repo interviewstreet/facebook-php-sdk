@@ -32,10 +32,18 @@ class Facebook extends BaseFacebook
    * @param Array $config the application configuration.
    * @see BaseFacebook::__construct in facebook.php
    */
-  public function __construct($config) {
+    public function __construct($config) {
     if (!session_id()) {
       session_start();
     }
+
+    if (isset($config['cache']) === TRUE) {
+        $this->cache = $config['cache'];
+        unset($config['cache']);
+    } else {
+        $this->cache = NULL;
+    }
+
     parent::__construct($config);
   }
 
@@ -55,7 +63,11 @@ class Facebook extends BaseFacebook
     }
 
     $session_var_name = $this->constructSessionVariableName($key);
-    $_SESSION[$session_var_name] = $value;
+    if ($this->cache != NULL) {
+        $this->cache->memcached->save($session_var_name, $value, 24*60*60);
+    } else {
+        $_SESSION[$session_var_name] = $value;
+    }
   }
 
   protected function getPersistentData($key, $default = false) {
@@ -65,8 +77,18 @@ class Facebook extends BaseFacebook
     }
 
     $session_var_name = $this->constructSessionVariableName($key);
-    return isset($_SESSION[$session_var_name]) ?
-      $_SESSION[$session_var_name] : $default;
+    if ($this->cache != NULL) {
+        $result = $this->cache->memcached->get($session_var_name);
+
+        if ($result != FALSE) {
+            return $result;
+        } else {
+            return $default;
+        }
+    } else {
+        return isset($_SESSION[$session_var_name]) ?
+            $_SESSION[$session_var_name] : $default;
+    }
   }
 
   protected function clearPersistentData($key) {
@@ -76,7 +98,11 @@ class Facebook extends BaseFacebook
     }
 
     $session_var_name = $this->constructSessionVariableName($key);
-    unset($_SESSION[$session_var_name]);
+    if ($this->cache != NULL) {
+        $this->cache->memcached->delete($session_var_name);
+    } else {
+        unset($_SESSION[$session_var_name]);
+    }
   }
 
   protected function clearAllPersistentData() {

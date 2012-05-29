@@ -1043,7 +1043,22 @@ abstract class BaseFacebook
     else {
       $protocol = 'http://';
     }
-    $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+    $domain = $_SERVER['HTTP_HOST'];
+
+    if (endsWith($domain, 'interviewstreet.com') && $domain !== 'www.interviewstreet.com') {
+        $_domain = 'www.interviewstreet.com';
+    } else if (endsWith($domain, 'localhost.com') && $domain !== 'localhost.com') {
+        $_domain = 'localhost.com';
+    } else {
+        $_domain = NULL;
+    }
+
+    if ($_domain != NULL) {
+        $domain = $_domain;
+    }
+
+    $currentUrl = $protocol . $domain . $_SERVER['REQUEST_URI'];
     $parts = parse_url($currentUrl);
 
     $query = '';
