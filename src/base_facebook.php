@@ -211,6 +211,12 @@ abstract class BaseFacebook
    * @param array $config The application configuration
    */
   public function __construct($config) {
+      if (isset($config['display'])) {
+          $this->LoginUrlDisplayMode = $config['display'];
+      } else {
+          $this->LoginUrlDisplayMode = NULL;
+      }
+
     $this->setAppId($config['appId']);
     $this->setAppSecret($config['secret']);
     if (isset($config['fileUpload'])) {
@@ -519,14 +525,26 @@ abstract class BaseFacebook
       $params['scope'] = implode(',', $scopeParams);
     }
 
-    return $this->getUrl(
-      'www',
-      'dialog/oauth',
-      array_merge(array(
-                    'client_id' => $this->getAppId(),
-                    'redirect_uri' => $currentUrl, // possibly overwritten
-                    'state' => $this->state),
-                  $params));
+    if ($this->LoginUrlDisplayMode === NULL) {
+        return $this->getUrl(
+          'www',
+          'dialog/oauth',
+          array_merge(array(
+                        'client_id' => $this->getAppId(),
+                        'redirect_uri' => $currentUrl, // possibly overwritten
+                        'state' => $this->state),
+                      $params));
+    } else {
+        return $this->getUrl(
+          'www',
+          'dialog/oauth',
+          array_merge(array(
+                        'client_id' => $this->getAppId(),
+                        'redirect_uri' => $currentUrl, // possibly overwritten
+                        'state' => $this->state,
+                        'display' => $this->LoginUrlDisplayMode),
+                      $params));
+    }
   }
 
   /**
