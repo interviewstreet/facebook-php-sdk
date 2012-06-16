@@ -376,7 +376,7 @@ abstract class BaseFacebook
     // first, consider a signed request if it's supplied.
     // if there is a signed request, then it alone determines
     // the access token.
-    $signed_request = $this->getSignedRequest();
+    $signed_request = NULL; //$this->getSignedRequest();
     if ($signed_request) {
       // apps.facebook.com hands the access_token in the signed_request
       if (array_key_exists('oauth_token', $signed_request)) {
