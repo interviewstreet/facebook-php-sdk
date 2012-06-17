@@ -44,6 +44,13 @@ class Facebook extends BaseFacebook
         $this->cache = NULL;
     }
 
+    if (isset($config['session_id']) === TRUE) {
+        $this->session_id = $config['session_id'];
+        unset($config['session_id']);
+    } else {
+        $this->session_id = NULL;
+    }
+
     parent::__construct($config);
   }
 
@@ -114,6 +121,7 @@ class Facebook extends BaseFacebook
   protected function constructSessionVariableName($key) {
     return implode('_', array('fb',
                               $this->getAppId(),
-                              $key));
+                              $key,
+                              $this->session_id));
   }
 }
